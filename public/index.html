@@ -21,7 +21,7 @@
         }
         #carousel-container {
             position: relative;
-            max-width: 500px; /* Aumenta a largura do carrossel */
+            max-width: 550px; /* Aumenta a largura do carrossel */
             margin: 0 auto;
         }
         #carousel-container header {
@@ -113,13 +113,19 @@
             background-color: #b38e2e;
             border-color: #b38e2e;
         }
+        /* Estilo para as mensagens de erro */
+        .invalid-feedback {
+            font-size: 1rem; /* Diminui a fonte das mensagens de erro */
+            color: #dc3545; /* Cor padrão de erro do Bootstrap */
+            font-family: 'Roboto', sans-serif;
+        }
     </style>
 </head>
 <body>
     <main>
         <section id="carousel-container">
             <header>
-                <h1>100 Anos da Vovó</h1>
+                <h1>100 Anos da Vovó Lica</h1>
                 <p>Venha celebrar conosco este momento especial!</p>
             </header>
             <div id="birthdayCarousel" class="carousel slide" data-bs-ride="carousel">
@@ -145,6 +151,7 @@
             </div>
         </section>
         <section id="invitation">
+            <br><p>Odorica Rodrigues e família convida você e sua família para a sua festa de 100 anos! Sua presença é muito importante e especial, então se programe! Confirme a sua presença e a da sua família para nos ajudar a organizar a festa.</p><br>
             <p>
                 <strong>Data:</strong> 
                 <a href="data:text/calendar;charset=utf8,BEGIN:VCALENDAR%0AVERSION:2.0%0ABEGIN:VEVENT%0ASUMMARY:100%20Anos%20da%20Vov%C3%B3%0ADTSTART:20250628T180000Z%0AEND:VEVENT%0AEND:VCALENDAR" download="100_anos_da_vovo.ics">
@@ -160,16 +167,41 @@
         </section>
         <section id="confirmation-form">
             <h2>Confirme sua presença</h2>
-            <form id="rsvp-form">
+            <form id="rsvp-form" novalidate>
                 <label for="name">Seu Nome:</label>
-                <input type="text" id="name" name="name" required>
+                <input type="text" id="name" name="name" required style="font-size: 1.2rem; font-family: 'Roboto', sans-serif;">
+
+                <label for="phone">Seu Telefone:</label>
+                <input type="text" id="phone" name="phone" required placeholder="(XX) XXXXX-XXXX" style="font-size: 1.2rem; font-family: 'Roboto', sans-serif;">
+
                 <label for="email">Seu E-mail:</label>
-                <input type="email" id="email" name="email" required>
+                <input type="email" id="email" name="email" required style="font-size: 1.2rem; font-family: 'Roboto', sans-serif;">
+
                 <label for="family-members">Quantidade de Acompanhantes:</label>
-                <input type="number" id="family-members" name="family-members" min="0" required>
+                <input type="number" id="family-members" name="family-members" min="0" max="99" required style="font-size: 1.2rem; font-family: 'Roboto', sans-serif;">
+
                 <button type="submit" id="submit-button">Enviar Confirmação</button>
             </form>
         </section>
+
+        <!-- Modal de confirmação -->
+        <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color: #d4af37; color: white;">
+                        <h5 class="modal-title" id="confirmationModalLabel">Confirmação Enviada</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Obrigado por enviar sua confirmação! Nos encontraremos na festa!
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn" style="background-color: #d4af37; color: white;" data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <section id="confirmation-message" style="display: none;">
             <h2>Obrigado pela sua confirmação!</h2>
             <p>Estamos ansiosos para vê-lo!</p>
@@ -182,13 +214,149 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../src/app.js"></script>
     <script>
+        // Máscara para o campo de telefone
+        const phoneInput = document.getElementById('phone');
+        phoneInput.addEventListener('input', function () {
+            let value = phoneInput.value.replace(/\D/g, ''); // Remove caracteres não numéricos
+            if (value.length > 11) value = value.slice(0, 11); // Limita a 11 dígitos
+
+            if (value.length > 10) {
+                // Formato para 11 dígitos: (XX) XXXXX-XXXX
+                phoneInput.value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            } else if (value.length > 6) {
+                // Formato para 10 dígitos: (XX) XXXX-XXXX
+                phoneInput.value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+            } else if (value.length > 2) {
+                // Formato parcial: (XX) XXXX
+                phoneInput.value = value.replace(/(\d{2})(\d{0,4})/, '($1) $2');
+            } else {
+                // Formato parcial: (XX
+                phoneInput.value = value.replace(/(\d{0,2})/, '($1');
+            }
+        });
+
+        // Impede caracteres não numéricos no campo de telefone
+        phoneInput.addEventListener('keypress', function (event) {
+            if (!/[0-9]/.test(event.key)) {
+                event.preventDefault();
+            }
+        });
+
+        // Validação personalizada do formulário
+        document.getElementById('rsvp-form').addEventListener('submit', function (event) {
+            const form = event.target;
+            let isValid = true;
+
+            // Verifica cada campo
+            form.querySelectorAll('input').forEach(input => {
+                if (!input.checkValidity()) {
+                    isValid = false;
+                    let errorMessage = '';
+
+                    // Mensagens personalizadas
+                    if (input.id === 'name') {
+                        errorMessage = 'Por favor, insira seu nome para que possamos identificá-lo.';
+                    } else if (input.id === 'phone') {
+                        errorMessage = 'Por favor, insira um número de telefone válido no formato (XX) XXXXX-XXXX.';
+                    } else if (input.id === 'email') {
+                        errorMessage = 'Por favor, insira um endereço de e-mail válido.';
+                    } else if (input.id === 'family-members') {
+                        errorMessage = 'Por favor, insira a quantidade de acompanhantes (máximo de 99).';
+                    }
+
+                    // Exibe a mensagem de erro
+                    //alert(errorMessage);
+                    input.focus();
+                }
+            });
+
+            // Impede o envio se houver erros
+            if (!isValid) {
+                event.preventDefault();
+            } else {
+                // Oculta o formulário e exibe a mensagem de confirmação
+                document.getElementById('confirmation-form').style.display = 'none';
+                document.getElementById('confirmation-message').style.display = 'block';
+            }
+        });
+    </script>
+    <script>
+        // Máscara para o campo de telefone
+        phoneInput.addEventListener('input', function () {
+            let value = phoneInput.value.replace(/\D/g, ''); // Remove caracteres não numéricos
+            if (value.length > 11) value = value.slice(0, 11); // Limita a 11 dígitos
+
+            if (value.length > 10) {
+                phoneInput.value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            } else if (value.length > 6) {
+                phoneInput.value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+            } else if (value.length > 2) {
+                phoneInput.value = value.replace(/(\d{2})(\d{0,4})/, '($1) $2');
+            } else {
+                phoneInput.value = value.replace(/(\d{0,2})/, '($1');
+            }
+        });
+
+        // Impede caracteres não numéricos no campo de telefone
+        phoneInput.addEventListener('keypress', function (event) {
+            if (!/[0-9]/.test(event.key)) {
+                event.preventDefault();
+            }
+        });
+
+        // Validação personalizada do formulário
         document.getElementById('rsvp-form').addEventListener('submit', function (event) {
             event.preventDefault(); // Impede o envio padrão do formulário
+            const form = event.target;
+            let isValid = true;
 
-            // Oculta o formulário e exibe a mensagem de confirmação
-            document.getElementById('confirmation-form').style.display = 'none';
-            document.getElementById('confirmation-message').style.display = 'block';
+            // Remove mensagens de erro anteriores
+            form.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+            form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+
+            // Verifica cada campo
+            form.querySelectorAll('input').forEach(input => {
+                if (!input.checkValidity()) {
+                    isValid = false;
+
+                    // Adiciona mensagem de erro abaixo do campo
+                    const errorMessage = document.createElement('div');
+                    errorMessage.className = 'invalid-feedback';
+                    errorMessage.textContent = getErrorMessage(input);
+
+                    // Adiciona a classe de erro ao campo
+                    input.classList.add('is-invalid');
+
+                    // Insere a mensagem de erro logo abaixo do campo
+                    if (!input.nextElementSibling || !input.nextElementSibling.classList.contains('invalid-feedback')) {
+                        input.parentNode.insertBefore(errorMessage, input.nextSibling);
+                    }
+                }
+            });
+
+            if (isValid) {
+                // Limpa os campos do formulário
+                form.reset();
+
+                // Exibe o modal de confirmação
+                const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+                confirmationModal.show();
+            }
         });
+
+        // Função para obter mensagens de erro personalizadas
+        function getErrorMessage(input) {
+            if (input.id === 'name') {
+                return 'Por favor, insira seu nome para que possamos identificá-lo.';
+            } else if (input.id === 'phone') {
+                return 'Por favor, insira um número de telefone válido no formato (XX) XXXXX-XXXX.';
+            } else if (input.id === 'email') {
+                return 'Por favor, insira um endereço de e-mail válido.';
+            } else if (input.id === 'family-members') {
+                return 'Por favor, insira a quantidade de acompanhantes (máximo de 99).';
+            }
+            return 'Este campo é obrigatório.';
+        }
     </script>
 </body>
 </html>
