@@ -119,6 +119,12 @@
             color: #dc3545; /* Cor padrão de erro do Bootstrap */
             font-family: 'Roboto', sans-serif;
         }
+        /* Ajusta as imagens no modal para se adequar à tela */
+        #expandedCarousel .carousel-inner img {
+            max-width: 100%; /* Limita a largura ao tamanho da tela */
+            max-height: 100vh; /* Limita a altura ao tamanho da janela de visualização */
+            object-fit: contain; /* Garante que a imagem seja redimensionada proporcionalmente */
+        }
     </style>
 </head>
 <body>
@@ -148,8 +154,49 @@
                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
                     <span class="visually-hidden">Próximo</span>
                 </button>
+
+                <!-- Botão para expandir as imagens -->
+                <button type="button" class="btn btn-light" style="position: absolute; bottom: 10px; left: 10px; z-index: 10;" data-bs-toggle="modal" data-bs-target="#imageModal">
+                    Expandir
+                </button>
             </div>
         </section>
+
+        <!-- Modal para exibir as imagens em full screen -->
+        <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-fullscreen">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="imageModalLabel">Imagens do Carrossel</h5>
+                        <button type="button" class="btn-close btn-xs" data-bs-dismiss="modal" aria-label="Close" style="width: 20px; height: 20px;"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="expandedCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                <div class="carousel-item active">
+                                    <img src="fotos/1.jpg" class="d-block mx-auto" alt="Foto 1">
+                                </div>
+                                <div class="carousel-item">
+                                    <img src="fotos/2.jpg" class="d-block mx-auto" alt="Foto 2">
+                                </div>
+                                <div class="carousel-item">
+                                    <img src="fotos/3.jpg" class="d-block mx-auto" alt="Foto 3">
+                                </div>
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#expandedCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Anterior</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#expandedCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Próximo</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <section id="invitation">
             <br><p>Odorica Rodrigues e família convida você e sua família para a sua festa de 100 anos! Sua presença é muito importante e especial, então se programe! Confirme a sua presença e a da sua família para nos ajudar a organizar a festa.</p><br>
             <p>
